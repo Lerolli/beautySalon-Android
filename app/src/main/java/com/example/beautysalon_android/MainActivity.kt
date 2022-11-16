@@ -21,8 +21,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.beautysalon_android.HistoryModule.HistoryVisitingScreen
 import com.example.beautysalon_android.ProfileModule.ProfileScreen
+import com.example.beautysalon_android.ServicesModule.ServicesViewModel
+
+val servicesViewModel = ServicesViewModel()
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -56,7 +60,8 @@ fun MainScreenPreview() {
 fun Navigation(navController: NavHostController) {
     NavHost(navController, startDestination = NavigationItem.Services.route) {
         composable(NavigationItem.Services.route) {
-            ServicesScreen()
+            servicesViewModel.getServices()
+            ServicesScreen(services = servicesViewModel.services)
         }
         composable(NavigationItem.HistoryVisiting.route) {
             HistoryVisitingScreen()
