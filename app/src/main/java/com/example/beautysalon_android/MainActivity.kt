@@ -15,12 +15,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.beautysalon_android.HistoryModule.HistoryVisitingScreen
 import com.example.beautysalon_android.ProfileModule.ProfileScreen
+import com.example.beautysalon_android.ServicesModule.ServiceScreen
 import com.example.beautysalon_android.ServicesModule.ServicesViewModel
 
 val servicesViewModel = ServicesViewModel()
@@ -61,13 +64,21 @@ fun Navigation(navController: NavHostController) {
     NavHost(navController, startDestination = NavigationItem.Services.route) {
         composable(NavigationItem.Services.route) {
             servicesViewModel.getServices()
-            ServicesScreen(services = servicesViewModel.services)
+            ServicesScreen(servicesViewModel.services, navController)
         }
         composable(NavigationItem.HistoryVisiting.route) {
             HistoryVisitingScreen()
         }
         composable(NavigationItem.Profile.route) {
             ProfileScreen()
+        }
+        composable(
+            NavigationItem.Service.route + "/{serviceName}",
+            arguments = listOf(navArgument("serviceName") { type = NavType.StringType })
+        )
+        { backStackEntry ->
+            val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
+            ServiceScreen(servicesViewModel.services, serviceName)
         }
     }
 }
@@ -95,15 +106,7 @@ fun BottomNavigationBar(navController: NavController) {
                 alwaysShowLabel = true,
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) {
-                                saveState = true
-                            }
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navController.navigate(item.route)
                 }
             )
         }
@@ -113,4 +116,5 @@ sealed class NavigationItem(var route: String, var icon: Int, var title: String)
     object Services : NavigationItem("services", R.drawable.ic_book, "Услуги")
     object HistoryVisiting : NavigationItem("historyVisiting", R.drawable.ic_book, "История посещений")
     object Profile : NavigationItem("profile", R.drawable.ic_book, "Профиль")
+    object Service : NavigationItem("service", R.drawable.ic_book, "Услуга")
 }
