@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.beautysalon_android.EnrollModule.EnrollScreen
 import com.example.beautysalon_android.HistoryModule.HistoryVisitingScreen
 import com.example.beautysalon_android.ProfileModule.ProfileScreen
 import com.example.beautysalon_android.ServicesModule.ServiceScreen
@@ -78,7 +79,15 @@ fun Navigation(navController: NavHostController) {
         )
         { backStackEntry ->
             val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
-            ServiceScreen(servicesViewModel.services, serviceName)
+            ServiceScreen(servicesViewModel.services, serviceName, navController)
+        }
+        composable(
+            NavigationItem.Enroll.route + "/{serviceName}",
+            arguments = listOf(navArgument("serviceName") { type = NavType.StringType })
+        )
+        { backStackEntry ->
+            val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
+            EnrollScreen(servicesViewModel.services, serviceName, navController)
         }
     }
 }
@@ -116,5 +125,6 @@ sealed class NavigationItem(var route: String, var icon: Int, var title: String)
     object Services : NavigationItem("services", R.drawable.ic_book, "Услуги")
     object HistoryVisiting : NavigationItem("historyVisiting", R.drawable.ic_book, "История посещений")
     object Profile : NavigationItem("profile", R.drawable.ic_book, "Профиль")
+    object Enroll : NavigationItem("enroll", R.drawable.ic_book, "Запись")
     object Service : NavigationItem("service", R.drawable.ic_book, "Услуга")
 }
