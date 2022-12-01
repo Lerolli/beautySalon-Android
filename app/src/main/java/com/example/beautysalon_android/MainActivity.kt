@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.beautysalon_android.HistoryModule.HistoryVisitingScreen
+import com.example.beautysalon_android.ProfileModule.LoginScreen
 import com.example.beautysalon_android.ProfileModule.ProfileScreen
 import com.example.beautysalon_android.ServicesModule.ServiceScreen
 import com.example.beautysalon_android.ServicesModule.ServicesViewModel
@@ -61,7 +62,7 @@ fun MainScreenPreview() {
 
 @Composable
 fun Navigation(navController: NavHostController) {
-    NavHost(navController, startDestination = NavigationItem.Services.route) {
+    NavHost(navController, startDestination = NavigationItem.Login.route) {
         composable(NavigationItem.Services.route) {
             servicesViewModel.getServices()
             ServicesScreen(servicesViewModel.services, navController)
@@ -71,6 +72,9 @@ fun Navigation(navController: NavHostController) {
         }
         composable(NavigationItem.Profile.route) {
             ProfileScreen()
+        }
+        composable(NavigationItem.Login.route) {
+            LoginScreen(navController)
         }
         composable(
             NavigationItem.Service.route + "/{serviceName}",
@@ -117,4 +121,5 @@ sealed class NavigationItem(var route: String, var icon: Int, var title: String)
     object HistoryVisiting : NavigationItem("historyVisiting", R.drawable.ic_book, "История посещений")
     object Profile : NavigationItem("profile", R.drawable.ic_book, "Профиль")
     object Service : NavigationItem("service", R.drawable.ic_book, "Услуга")
+    object Login : NavigationItem("login", R.drawable.ic_book, "Логин")
 }
