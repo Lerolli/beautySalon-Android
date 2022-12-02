@@ -17,10 +17,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.beautysalon_android.NavigationItem
 import com.example.beautysalon_android.R
 
 @Composable
-fun ServiceScreen(services: List<Service>, serviceName: String) {
+fun ServiceScreen(services: List<Service>, serviceName: String, navController: NavHostController) {
     val service = services.find { it.name == serviceName }!!
 
     val padding = 16.dp
@@ -49,7 +51,9 @@ fun ServiceScreen(services: List<Service>, serviceName: String) {
             Text(text = service.description!!, fontSize = 10.sp)
         }
         Button(
-            onClick = {},
+            onClick = {
+                navController.navigate(NavigationItem.Enroll.route + "/${service.name}")
+            },
             modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.Black)
