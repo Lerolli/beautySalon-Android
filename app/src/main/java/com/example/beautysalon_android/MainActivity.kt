@@ -23,7 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.beautysalon_android.EnrollModule.EnrollScreen
 import com.example.beautysalon_android.HistoryModule.HistoryVisitingScreen
-import com.example.beautysalon_android.ProfileModule.LoginScreen
+import com.example.beautysalon_android.AuthModule.LoginScreen
+import com.example.beautysalon_android.HistoryModule.HistoryScreen
 import com.example.beautysalon_android.ProfileModule.ProfileScreen
 import com.example.beautysalon_android.ServicesModule.ServiceScreen
 import com.example.beautysalon_android.ServicesModule.ServicesViewModel
@@ -69,7 +70,7 @@ fun Navigation(navController: NavHostController) {
             ServicesScreen(servicesViewModel.services, navController)
         }
         composable(NavigationItem.HistoryVisiting.route) {
-            HistoryVisitingScreen()
+            HistoryVisitingScreen(navController)
         }
         composable(NavigationItem.Profile.route) {
             ProfileScreen()
@@ -92,6 +93,20 @@ fun Navigation(navController: NavHostController) {
         { backStackEntry ->
             val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
             EnrollScreen(servicesViewModel.services, serviceName, navController)
+        }
+        composable(
+            NavigationItem.History.route + "/{serviceName}/{master}/{time}",
+            arguments = listOf(
+                navArgument("serviceName") { type = NavType.StringType },
+                navArgument("master") { type = NavType.StringType },
+                navArgument("time") { type = NavType.StringType },
+            )
+        )
+        { backStackEntry ->
+            val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
+            val master = backStackEntry.arguments!!.getString("master")!!
+            val time = backStackEntry.arguments!!.getString("time")!!
+            HistoryScreen(servicesViewModel.services, serviceName, master, time, navController)
         }
     }
 }
@@ -132,4 +147,5 @@ sealed class NavigationItem(var route: String, var icon: Int, var title: String)
     object Enroll : NavigationItem("enroll", R.drawable.ic_book, "Запись")
     object Service : NavigationItem("service", R.drawable.ic_book, "Услуга")
     object Login : NavigationItem("login", R.drawable.ic_book, "Логин")
+    object History : NavigationItem("history", R.drawable.ic_book, "История посещения")
 }
