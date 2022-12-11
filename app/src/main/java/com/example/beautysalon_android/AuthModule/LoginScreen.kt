@@ -1,4 +1,4 @@
-package com.example.beautysalon_android.ProfileModule
+package com.example.beautysalon_android.AuthModule
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

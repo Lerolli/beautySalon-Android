@@ -1,4 +1,4 @@
-package com.example.beautysalon_android.ServicesModule.Views
+package com.example.beautysalon_android.HistoryModule.Views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -14,10 +14,10 @@ import com.example.beautysalon_android.R
 import com.example.beautysalon_android.ServicesModule.Service
 
 @Composable
-fun ServiceView(service: Service, onItemClick:(name:String) -> Unit) {
+fun HistoryView(service: Service, master:String, time: String, onItemClick:(name:String, master:String, time:String ) -> Unit) {
     Row(modifier = Modifier
         .padding(all = 8.dp)
-        .clickable { onItemClick(service.name!!) }) {
+        .clickable { onItemClick(service.name!!, master, time) }) {
         Image(
             painter = painterResource(R.drawable.ic_book),
             contentDescription = "Contact profile picture",
@@ -31,8 +31,8 @@ fun ServiceView(service: Service, onItemClick:(name:String) -> Unit) {
         Column {
             Text(text = service.name ?: "")
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = service.price.toString())
-            Text(text = service.description ?: "")
+            Text(text = "Мастер: $master")
+            Text(text = "Дата и время посещения: $time")
         }
     }
 }
