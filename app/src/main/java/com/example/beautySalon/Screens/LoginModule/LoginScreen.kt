@@ -1,4 +1,4 @@
-package com.example.beautysalon_android.AuthModule
+package com.example.beautySalon.Screens.LoginModule
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,20 +11,24 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.beautysalon_android.NavigationItem
+import androidx.navigation.compose.rememberNavController
+import com.example.beautySalon.Managers.LoginScreenManager
+import com.example.beautySalon.NavigationItem
 import com.example.beautysalon_android.R
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(mana: LoginScreenManager, navController: NavHostController) {
+    var phoneNumber by remember { mutableStateOf(TextFieldValue("")) }
     var smsCode by remember { mutableStateOf(TextFieldValue("")) }
-    var phone by remember { mutableStateOf(TextFieldValue("")) }
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.colorPrimaryDark))
+            .background(colorResource(id = R.color.Cultured))
             .wrapContentSize(Alignment.Center)
     ) {
         Surface(
@@ -32,25 +36,33 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
         ) {
             OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = { Text(text = stringResource(id = R.string.phone)) },
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text(text = stringResource(id = R.string.phoneNumberHint)) },
                 placeholder = { Text(text = stringResource(id = R.string.phone)) },
                 modifier = Modifier.fillMaxWidth()
             )
         }
         Button(
-            onClick = {},
-            modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
+            onClick = {
+                mana.sendCode(phoneNumber.text)
+
+            },
+            modifier = Modifier
+                .padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.White,
-                contentColor = Color.Black
+                backgroundColor = colorResource(id = R.color.BitterSweet),
+                contentColor = Color.White
             )
         ) {
-            Text(text = stringResource(id = R.string.send_sms), modifier = Modifier.padding(8.dp))
+            Text(
+                text = stringResource(id = R.string.send_sms), 
+                modifier = Modifier.padding(8.dp)
+            )
         }
-        Surface(
+
+            Surface(
             color = Color.White,
             modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
         ) {
@@ -64,13 +76,16 @@ fun LoginScreen(navController: NavHostController) {
         }
         Button(
             onClick = {
-                navController.navigate(NavigationItem.Services.route)
+                if (mana.sheckCode(smsCode.text)) {
+                    navController.navigate(NavigationItem.Services.route)
+                }
             },
-            modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
+            modifier = Modifier
+                .padding(vertical = dimensionResource(id = R.dimen.padding_8dp))
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.White,
-                contentColor = Color.Black
+                backgroundColor = colorResource(id = R.color.BitterSweet),
+                contentColor = Color.White
             )
         ) {
             Text(
@@ -79,4 +94,11 @@ fun LoginScreen(navController: NavHostController) {
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ComposablePreview() {
+    val loginScreenViewModel = LoginScreenManager()
+    LoginScreen(mana = loginScreenViewModel, navController = rememberNavController())
 }
