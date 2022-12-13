@@ -1,4 +1,4 @@
-package com.example.beautysalon_android
+package com.example.beautySalon
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,22 +21,33 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.beautysalon_android.EnrollModule.EnrollScreen
-import com.example.beautysalon_android.HistoryModule.HistoryVisitingScreen
-import com.example.beautysalon_android.AuthModule.LoginScreen
-import com.example.beautysalon_android.HistoryModule.HistoryScreen
-import com.example.beautysalon_android.ProfileModule.ProfileScreen
-import com.example.beautysalon_android.ServicesModule.ServiceScreen
-import com.example.beautysalon_android.ServicesModule.ServicesViewModel
+import com.example.beautySalon.Screens.EnrollModule.EnrollScreen
+import com.example.beautySalon.Screens.HistoryModule.HistoryVisitingScreen
+import com.example.beautySalon.Screens.LoginModule.LoginScreen
+import com.example.beautySalon.Managers.*
+import com.example.beautySalon.Screens.HistoryModule.HistoryScreen
+import com.example.beautySalon.Screens.ProfileModule.ProfileScreen
+import com.example.beautySalon.Screens.ServicesModule.ServiceScreen
+import com.example.beautysalon_android.R
 
-val servicesViewModel = ServicesViewModel()
+
+val servicesManager = ServicesManager()
+val loginManager = LoginScreenManager()
+val enrollManager = EnrollManager()
+val historyManager = HistoryManager()
+val profileManager = ProfileManager()
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            servicesManager.getServices()
+            enrollManager.getMasters()
+            historyManager.getHistory()
+            profileManager.getInfoProfile()
             MainScreen()
+
         }
     }
 }
@@ -52,47 +63,42 @@ fun MainScreen() {
                 Navigation(navController = navController)
             }
         },
-        backgroundColor = colorResource(R.color.colorPrimaryDark) // Set background color to avoid the white flashing when you switch between screens
+        backgroundColor = colorResource(R.color.Cultured)
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    MainScreen()
 }
 
 @Composable
 fun Navigation(navController: NavHostController) {
     NavHost(navController, startDestination = NavigationItem.Login.route) {
         composable(NavigationItem.Services.route) {
-            servicesViewModel.getServices()
-            ServicesScreen(servicesViewModel.services, navController)
+            ServicesScreen(servicesManager, navController)
         }
         composable(NavigationItem.HistoryVisiting.route) {
-            HistoryVisitingScreen(navController)
+            HistoryVisitingScreen(historyManager, navController)
         }
         composable(NavigationItem.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(profileManager)
         }
         composable(NavigationItem.Login.route) {
-            LoginScreen(navController)
+            LoginScreen(loginManager, navController)
         }
         composable(
             NavigationItem.Service.route + "/{serviceName}",
             arguments = listOf(navArgument("serviceName") { type = NavType.StringType })
         )
         { backStackEntry ->
-            val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
-            ServiceScreen(servicesViewModel.services, serviceName, navController)
+            val serviceName = backStackEntry.arguments?.getString("serviceName")
+            val service = servicesManager.services.find { it.name == serviceName }
+            ServiceScreen(service, navController)
         }
         composable(
             NavigationItem.Enroll.route + "/{serviceName}",
             arguments = listOf(navArgument("serviceName") { type = NavType.StringType })
         )
         { backStackEntry ->
-            val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
-            EnrollScreen(servicesViewModel.services, serviceName, navController)
+            val serviceName = backStackEntry.arguments?.getString("serviceName")?: ""
+            val service = servicesManager.services.find { it.name == serviceName }?: Service("", "", 1, "2")
+            EnrollScreen(enrollManager, service, navController)
         }
         composable(
             NavigationItem.History.route + "/{serviceName}/{master}/{time}",
@@ -103,10 +109,11 @@ fun Navigation(navController: NavHostController) {
             )
         )
         { backStackEntry ->
-            val serviceName = backStackEntry.arguments!!.getString("serviceName")!!
-            val master = backStackEntry.arguments!!.getString("master")!!
-            val time = backStackEntry.arguments!!.getString("time")!!
-            HistoryScreen(servicesViewModel.services, serviceName, master, time, navController)
+            val serviceName = backStackEntry.arguments?.getString("serviceName")?: ""
+            val master = backStackEntry.arguments?.getString("master")?: ""
+            val time = backStackEntry.arguments?.getString("time")?: ""
+            val service = servicesManager.services.find { it.name == serviceName }?: Service("", "", 1, "2")
+            HistoryScreen(HistoryData(master, time, service))
         }
     }
 }
@@ -120,14 +127,14 @@ fun BottomNavigationBar(navController: NavController) {
         NavigationItem.Profile
     )
     BottomNavigation(
-        backgroundColor = colorResource(id = R.color.colorPrimary),
+        backgroundColor = colorResource(id = R.color.Independence),
         contentColor = Color.White
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         items.forEach { item ->
             BottomNavigationItem(
-                icon = { Icon(painterResource(id = item.icon), contentDescription = item.title) },
+                icon = { Icon(painterResource(id = item.icon?: 0), contentDescription = item.title) },
                 label = { Text(text = item.title) },
                 selectedContentColor = Color.White,
                 unselectedContentColor = Color.White.copy(0.4f),
@@ -140,12 +147,13 @@ fun BottomNavigationBar(navController: NavController) {
         }
     }
 }
-sealed class NavigationItem(var route: String, var icon: Int, var title: String) {
-    object Services : NavigationItem("services", R.drawable.ic_book, "Услуги")
-    object HistoryVisiting : NavigationItem("historyVisiting", R.drawable.ic_book, "История посещений")
-    object Profile : NavigationItem("profile", R.drawable.ic_book, "Профиль")
-    object Enroll : NavigationItem("enroll", R.drawable.ic_book, "Запись")
-    object Service : NavigationItem("service", R.drawable.ic_book, "Услуга")
-    object Login : NavigationItem("login", R.drawable.ic_book, "Логин")
-    object History : NavigationItem("history", R.drawable.ic_book, "История посещения")
+
+sealed class NavigationItem(var route: String, var icon: Int?, var title: String) {
+    object Services : NavigationItem("services", R.drawable.ic_services, "Услуги")
+    object HistoryVisiting : NavigationItem("historyVisiting", R.drawable.ic_history, "История")
+    object Profile : NavigationItem("profile", R.drawable.ic_profile, "Профиль")
+    object Enroll : NavigationItem("enroll", null, "Запись")
+    object Service : NavigationItem("service", null, "Услуга")
+    object Login : NavigationItem("login", null, "Логин")
+    object History : NavigationItem("history", null, "История посещения")
 }

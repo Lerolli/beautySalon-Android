@@ -13,7 +13,7 @@
         android:theme="@style/Theme.BeautySalonAndroid"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.beautySalon.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.BeautySalonAndroid">
             <intent-filter>
@@ -27,5 +27,5 @@
                 android:value="" />
         </activity>
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
